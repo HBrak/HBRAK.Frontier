@@ -27,6 +27,6 @@ public class ConfigAbiResponse
     [JsonPropertyName("cfg")]
     public List<ConfigAbiCfg> Cfg { get; set; } = new();
 
-    [JsonPropertyName("system_ids")]
+    [JsonPropertyName("systems")]
     public List<ConfigAbiSystem> Systems { get; set; } = new();
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Info;
 
 public class FuelInfo
 {
@@ -13,5 +13,5 @@ public class FuelInfo
     [JsonPropertyName("burnRateInSec")] public int BurnRateInSec { get; set; }
     [JsonPropertyName("efficiency")] public int Efficiency { get; set; }
     [JsonPropertyName("typeId")] public int TypeId { get; set; }
-    [JsonPropertyName("unitVolume")] public int UnitVolume { get; set; }
+    [JsonPropertyName("unitVolume")] public long UnitVolume { get; set; }
 }

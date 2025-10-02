@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Info;
 
 public class BurnInfo
 {

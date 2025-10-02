@@ -28,19 +28,35 @@ internal class SmartAssemblyConverter : JsonConverter<SmartAssemblyBase>
                 "SmartTurret" => SmartAssemblyType.SmartTurret,
                 "Manufacturing" => SmartAssemblyType.Manufacturing,
                 "Refinery" => SmartAssemblyType.Refinery,
+                "NetworkNode" => SmartAssemblyType.NetworkNode,
+                "SmartHangar" => SmartAssemblyType.SmartHangar,
                 _ => SmartAssemblyType.Unknown
             };
+
+            if (kind == SmartAssemblyType.Unknown)
+            {
+                Console.WriteLine($"{s} : SmartAssembly type unknown");
+                return null;
+            }
+                
+        }else
+        {
+            // type property missing
+            Console.WriteLine("SmartAssembly type property missing");
+            return null;
         }
 
         var json = root.GetRawText();
         var targetType = kind switch
         {
-            SmartAssemblyType.SmartStorageUnit => typeof(SmartStorageUnitAssembly),
+            SmartAssemblyType.SmartStorageUnit => typeof(SmartAssemblyStorageUnit),
             SmartAssemblyType.SmartGate => typeof(SmartGateAssembly),
             SmartAssemblyType.SmartTurret => typeof(SmartTurretAssembly),
-            SmartAssemblyType.Manufacturing => typeof(ManufacturingAssembly),
-            SmartAssemblyType.Refinery => typeof(RefineryAssembly),
-            _ => throw new NotSupportedException($"Unsupported SmartAssembly type: {kind}")
+            SmartAssemblyType.Manufacturing => typeof(SmartAssemblyManufacturing),
+            SmartAssemblyType.Refinery => typeof(SmartAssemblyRefinery),
+            SmartAssemblyType.NetworkNode => typeof(SmartAssemblyNetworkNode),
+            SmartAssemblyType.SmartHangar => typeof(SmartAssemblyHangar),
+            _ => typeof(SmartAssemblyUnknown)
         };
 
         var result = (SmartAssemblyBase?)JsonSerializer.Deserialize(json, targetType, options);

@@ -52,7 +52,7 @@ public class ConfigResponse
     public string PodPublicSigningKey { get; set; } = string.Empty;
 
     [JsonPropertyName("rpcUrls")]
-    public RpcUrls RpcUrls { get; set; } = new();
+    public ConfigRpcEndpoint RpcUrls { get; set; } = new();
 
     [JsonPropertyName("systems")]
     public ConfigSystems Systems { get; set; } = new();

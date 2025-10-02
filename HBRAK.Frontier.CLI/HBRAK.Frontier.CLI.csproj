@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HBRAK.Frontier.Api\HBRAK.Frontier.Api.csproj" />
     <ProjectReference Include="..\HBRAK.Frontier.Authorization\HBRAK.Frontier.Authorization.csproj" />
   </ItemGroup>
 

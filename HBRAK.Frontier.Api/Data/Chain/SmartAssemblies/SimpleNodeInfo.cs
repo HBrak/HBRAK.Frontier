@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 
-public class SimpleNode
+public class SimpleNodeInfo
 {
     [JsonPropertyName("isParentNodeOnline")] public bool IsParentNodeOnline { get; set; }
 }

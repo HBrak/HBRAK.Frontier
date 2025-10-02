@@ -1,13 +1,14 @@
-﻿using System;
+﻿using HBRAK.Frontier.Api.Data.Info;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 
-public class NetworkNode
+public class NetworkNodeInfo
 {
     [JsonPropertyName("burn")] public BurnInfo Burn { get; set; } = new();
     [JsonPropertyName("energyMaxCapacity")] public int EnergyMaxCapacity { get; set; }

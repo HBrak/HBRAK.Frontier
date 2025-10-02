@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 
-public class SmartStorageUnitAssembly : SmartAssemblyBase
+public class SmartAssemblyNetworkNode : SmartAssemblyBase
 {
-    [JsonPropertyName("storage")] public StorageInfo Storage { get; set; } = new();
+    [JsonPropertyName("networkNode")] public NetworkNodeInfo NetworkNode { get; set; } = new();
 }

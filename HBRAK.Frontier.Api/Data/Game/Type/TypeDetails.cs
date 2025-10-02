@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Game.Type;
 
 public class TypeDetails
 {
@@ -16,9 +16,9 @@ public class TypeDetails
     [JsonPropertyName("groupName")] public string GroupName { get; set; } = string.Empty;
     [JsonPropertyName("iconUrl")] public string IconUrl { get; set; } = string.Empty;
     [JsonPropertyName("id")] public int Id { get; set; }
-    [JsonPropertyName("mass")] public int Mass { get; set; }
+    [JsonPropertyName("mass")] public double Mass { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
     [JsonPropertyName("portionSize")] public int PortionSize { get; set; }
-    [JsonPropertyName("radius")] public int Radius { get; set; }
-    [JsonPropertyName("volume")] public int Volume { get; set; }
+    [JsonPropertyName("radius")] public double Radius { get; set; }
+    [JsonPropertyName("volume")] public double Volume { get; set; }
 }

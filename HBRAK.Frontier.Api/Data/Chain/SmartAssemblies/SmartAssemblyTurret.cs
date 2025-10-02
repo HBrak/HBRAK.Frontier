@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 
-public class RefineryAssembly
+public class SmartTurretAssembly : SmartAssemblyBase
 {
-    [JsonPropertyName("refinery")] public SimpleNode Refinery { get; set; } = new();
+    [JsonPropertyName("turret")] public SimpleNodeInfo Turret { get; set; } = new();
 }

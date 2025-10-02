@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Chain.KillMail;
 
 public class Killmail
 {
@@ -13,7 +13,7 @@ public class Killmail
     public int Id { get; set; }
 
     [JsonPropertyName("killer")]
-    public CharacterRef Killer { get; set; } = new();
+    public SmartCharacterReference Killer { get; set; } = new();
 
     [JsonPropertyName("solarSystemId")]
     public int SolarSystemId { get; set; }
@@ -22,5 +22,5 @@ public class Killmail
     public string Time { get; set; } = string.Empty;
 
     [JsonPropertyName("victim")]
-    public CharacterRef Victim { get; set; } = new();
+    public SmartCharacterReference Victim { get; set; } = new();
 }

@@ -5,12 +5,11 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Chain;
+namespace HBRAK.Frontier.Api.Data.Info;
 
-public class EphemeralInventory
+public class Inventory
 {
     [JsonPropertyName("capacity")] public string Capacity { get; set; } = string.Empty;
     [JsonPropertyName("items")] public List<InventoryItem> Items { get; set; } = new();
-    [JsonPropertyName("owner")] public CharacterRef Owner { get; set; } = new();
     [JsonPropertyName("usedCapacity")] public string UsedCapacity { get; set; } = string.Empty;
 }

@@ -17,6 +17,8 @@ public enum SmartAssemblyType
     SmartGate,
     SmartTurret,
     Manufacturing,
-    Refinery
+    Refinery,
+    NetworkNode,
+    SmartHangar
 }
 

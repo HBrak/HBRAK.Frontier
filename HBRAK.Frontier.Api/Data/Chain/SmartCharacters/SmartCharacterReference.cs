@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data;
 
-public class CharacterRef
+public class SmartCharacterReference
 {
     [JsonPropertyName("address")]
     public string Address { get; set; } = string.Empty;
