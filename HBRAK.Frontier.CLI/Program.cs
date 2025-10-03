@@ -22,19 +22,7 @@ namespace HBRAK.Frontier.Cli
 
         public static async Task Main(string[] args)
         {
-            
-            
 
-            await FindSpecificTypeNameInStorages("Building Foam");
-
-            return;
-
-            await TestAuth(auth);
-
-            var chars = await api.GetSmartCharactersAsync(100);
-            var HoelbrakRef = chars.Where(x => x.Name == "Hoelbrak").FirstOrDefault();
-            string? me = await api.GetFromApiAsync<string?>($"v2/smartcharacters/{HoelbrakRef.Address}", auth.Tokens.FirstOrDefault());
-            await TestApi(auth.Tokens.FirstOrDefault(), api);
         }
 
         public static async Task FindSpecificTypeNameInStorages(string name)
@@ -145,7 +133,7 @@ namespace HBRAK.Frontier.Cli
 
             // Use the first token for endpoints that require auth (e.g., jumps)
             AccessToken? accessToken = auth.Tokens.FirstOrDefault();
-            accessToken = await auth.RefreshAsync(accessToken);
+            accessToken = await auth.RefreshAsync(accessToken!);
         }
         public static async Task TestApi(AccessToken? accessToken, IApiService api)
         {

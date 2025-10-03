@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:HBRAK.Frontier.UI.StorageSearcher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="HBRAK.Frontier.UI.StorageSearcher.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        xmlns:li="using:LoadingIndicators.Avalonia"
+        Title="HBRAK.Frontier.UI.StorageSearcher">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<Grid RowDefinitions="Auto,Auto,Auto,*,Auto"
+		  ColumnDefinitions="*">
+		<!-- Top bar -->
+		<Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+			<!-- Left: button -->
+			<Button Grid.Column="0"
+					Content="Load storages"
+					Command="{Binding LoadStoragesCommand}"
+					Margin="0,0,8,0"/>
+
+			<!-- Right: count + flashing "Loading…" -->
+			<StackPanel Grid.Column="1"
+						Orientation="Horizontal"
+						Spacing="8"
+						HorizontalAlignment="Right"
+						VerticalAlignment="Center">
+
+				<TextBlock Text="{Binding StorageCount, StringFormat=Storages Loaded: {0}}" Grid.Column="2"/>
+
+				<TextBlock Text="{Binding LoadingText}" Grid.Column="3"/>
+
+				<li:LoadingIndicator IsActive="{Binding IsLoading}" Mode="Arcs" SpeedRatio="1.2" Grid.Column="4" />
+
+			</StackPanel>
+		</Grid>
+
+
+		<Separator Grid.Row="1" Margin="0,8"/>
+
+		<!-- Search row -->
+		<Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+			<TextBox Text="{Binding TargetType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+					 Watermark="Target Type"
+					 Margin="0,0,8,0"/>
+			<Button Grid.Column="1"
+					Content="Find"
+					Command="{Binding FindTargetTypesCommand}"/>
+		</Grid>
+
+		<Separator Grid.Row="3" Margin="0,8"/>
+
+		<!-- Results list -->
+		<ScrollViewer Grid.Row="4">
+			<ListBox 
+			ItemsSource="{Binding TargetTypesStored}">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+		</ScrollViewer>
+
+	</Grid>
+</Window>
