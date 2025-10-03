@@ -18,7 +18,7 @@ namespace HBRAK.Frontier.Api.Service;
 
 public interface IApiService
 {
-    public Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int limit = 10) where T : class;
+    public Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int limit = 10, Dictionary<string, string>? extraParams = null) where T : class;
     public Task<T?> GetFromApiAsync<T>(string apiPath, AccessToken? accessToken = null) where T : class;
 
     //meta
@@ -32,7 +32,7 @@ public interface IApiService
     public Task<List<SmartAssemblyReference>> GetSmartAssembliesAsync(SmartAssemblyType? type = null, int limit = 100);
     public Task<SmartAssemblyBase?> GetSmartAssemblyIdAsync(string id);
     public Task<List<SmartCharacterReference>> GetSmartCharactersAsync(int limit = 100);
-    public Task<SmartCharacter?> GetSmartCharacterIdAsync(string id);
+    public Task<SmartCharacter?> GetSmartCharacterAdressAsync(string adress);
 
     //game
     public Task<List<FuelType>> GetFuelsAsync(int limit = 100);

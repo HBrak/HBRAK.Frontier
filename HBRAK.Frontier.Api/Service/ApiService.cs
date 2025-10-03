@@ -58,17 +58,30 @@ public class ApiService : IApiService
         }
 
         var json = await response.Content.ReadAsStringAsync();
+
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)json;
+        }
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    public async Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int limit = 10) where T : class
+    public async Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int limit = 10, Dictionary<string, string>? extraParams = null) where T : class
     {
         int offset = 0;
         List<T> listItems = [];
 
+        string extraQuery = string.Empty;
+        if (extraParams is not null && extraParams.Count > 0)
+        {
+            var encoded = extraParams
+                .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}");
+            extraQuery = "&" + string.Join("&", encoded);
+        }
+
         while (true)
         {
-            var res = await GetFromApiAsync<ListResponse?>($"{apiPath}?limit={limit}&offset={offset}", accessToken);
+            var res = await GetFromApiAsync<ListResponse?>($"{apiPath}?limit={limit}&offset={offset}{extraQuery}", accessToken);
 
             if (res == null)
             {
@@ -119,11 +132,15 @@ public class ApiService : IApiService
 
     public async Task<List<SmartAssemblyReference>> GetSmartAssembliesAsync(SmartAssemblyType? type = null, int limit = 100)
     {
-        var url = type == null
-            ? "v2/smartassemblies"
-            : $"v2/smartassemblies?type={type.Value}";
-
-        return await GetListFromApiAsync<SmartAssemblyReference>(url, null, limit);
+        Dictionary<string, string>? param = null;
+        if (type != null)
+        {
+            param = new Dictionary<string, string>
+            {
+                { "type", type.Value.ToString() }
+            };
+        }
+        return await GetListFromApiAsync<SmartAssemblyReference>("v2/smartassemblies", null, limit, param);
     }
 
     public async Task<SmartAssemblyBase?> GetSmartAssemblyIdAsync(string id)
@@ -136,9 +153,9 @@ public class ApiService : IApiService
         return await GetListFromApiAsync<SmartCharacterReference>("v2/smartcharacters", null, limit);
     }
 
-    public async Task<SmartCharacter?> GetSmartCharacterIdAsync(string id)
+    public async Task<SmartCharacter?> GetSmartCharacterAdressAsync(string adress)
     {
-        return await GetFromApiAsync<SmartCharacter?>($"v2/smartcharacters/{id}");
+        return await GetFromApiAsync<SmartCharacter?>($"v2/smartcharacters/{adress}");
     }
 
     public async Task<List<FuelType>> GetFuelsAsync(int limit = 100)

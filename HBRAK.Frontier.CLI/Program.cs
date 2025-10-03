@@ -1,23 +1,121 @@
-﻿using HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
+﻿using HBRAK.Frontier.Api.Data.Chain.Enums;
+using HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 using HBRAK.Frontier.Api.Data.Game.Fuels;
+using HBRAK.Frontier.Api.Data.Info;
 using HBRAK.Frontier.Api.Service;
 using HBRAK.Frontier.Authorization.Data;
 using HBRAK.Frontier.Authorization.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HBRAK.Frontier.Cli
 {
     internal static class Program
     {
         private static readonly Random Rng = new();
+        private static IAuthorizationService auth = new AuthorizationService("9d9462d1-7830-459e-9317-c0a8ce3f8c8d");
+        private static IApiService api = new ApiService();
 
         public static async Task Main(string[] args)
         {
-            IAuthorizationService auth = new AuthorizationService("9d9462d1-7830-459e-9317-c0a8ce3f8c8d");
+            
+            
 
+            await FindSpecificTypeNameInStorages("Building Foam");
+
+            return;
+
+            await TestAuth(auth);
+
+            var chars = await api.GetSmartCharactersAsync(100);
+            var HoelbrakRef = chars.Where(x => x.Name == "Hoelbrak").FirstOrDefault();
+            string? me = await api.GetFromApiAsync<string?>($"v2/smartcharacters/{HoelbrakRef.Address}", auth.Tokens.FirstOrDefault());
+            await TestApi(auth.Tokens.FirstOrDefault(), api);
+        }
+
+        public static async Task FindSpecificTypeNameInStorages(string name)
+        {
+            List<SmartAssemblyStorageUnit> storages = [];
+
+            Console.WriteLine($"Fetching specific types (Name = {name}) in storages");
+            var types = await api.GetTypesAsync(100); // adjust if you need more than 100
+            var idSet = types
+                .Where(t => t.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .Select(t => t.Id)
+                .ToHashSet();
+
+            Console.WriteLine($"Found {idSet.Count} types with name: {name}");
+            if (idSet.Count == 0) return;
+
+            Console.WriteLine("Fetching all storage refs");
+            var storageRefs = await api.GetSmartAssembliesAsync(SmartAssemblyType.SmartStorageUnit);
+
+            // 1) De-duplicate refs by Id to avoid fetching the same storage multiple times
+            var distinctRefs = storageRefs
+                .DistinctBy(r => r.Id)
+                .ToList();
+
+            int current = 0;
+            foreach (var storageRef in distinctRefs)
+            {
+                Console.Write($"\rFetching storage by reference {current}/{distinctRefs.Count}");
+                var storage = await api.GetSmartAssemblyIdAsync(storageRef.Id) as SmartAssemblyStorageUnit;
+                if (storage is not null)
+                    storages.Add(storage);
+                current++;
+            }
+            Console.WriteLine();
+
+            // 2) De-duplicate storages by Id (belt & suspenders)
+            storages = storages
+                .DistinctBy(s => s.Id)
+                .ToList();
+
+            // 3) Filter to storages that have at least one matching type,
+            //    and compute per-type totals to avoid duplicate prints
+            var storagesWithType = storages
+                .Select(s => new
+                {
+                    Storage = s,
+                    PerType = (s?.Storage?.MainInventory?.Items ?? Enumerable.Empty<InventoryItem>())
+                        .Where(i => idSet.Contains(i.TypeId))
+                        .GroupBy(i => i.TypeId)
+                        .Select(g => new
+                        {
+                            TypeId = g.Key,
+                            Name = g.First().Name,
+                            Qty = g.Sum(x => x.Quantity)
+                        })
+                        .ToList()
+                })
+                .Where(x => x.PerType.Count > 0)
+                // Optional: sort storages by total qty of matching items
+                .OrderByDescending(x => x.PerType.Sum(t => t.Qty))
+                .ToList();
+
+            Console.WriteLine($"{storagesWithType.Count} storages found with {name}");
+
+            // 4) Print once per storage per type (no duplicates)
+            foreach (var x in storagesWithType)
+            {
+                var owner = x.Storage.Owner?.Name ?? "<unknown>";
+                var system = x.Storage.SolarSystem?.Name ?? "<unknown>";
+                var storageName = x.Storage.Name ?? string.Empty;
+                var storageId = x.Storage.Id;
+
+                foreach (var t in x.PerType)
+                {
+                    Console.WriteLine($"{owner} has {t.Qty} {t.Name} stored in {system} - {storageName} - {storageId}");
+                }
+            }
+        }
+
+        public static async Task TestAuth(IAuthorizationService auth)
+        {
             try
             {
                 await auth.LoadAndRefreshAllAsync();
@@ -48,11 +146,10 @@ namespace HBRAK.Frontier.Cli
             // Use the first token for endpoints that require auth (e.g., jumps)
             AccessToken? accessToken = auth.Tokens.FirstOrDefault();
             accessToken = await auth.RefreshAsync(accessToken);
-
-            IApiService api = new ApiService();
-
+        }
+        public static async Task TestApi(AccessToken? accessToken, IApiService api)
+        {
             // Config/health endpoints
-
             await RunConfigTests(api);
 
             // --------- Chain endpoints ---------
@@ -60,20 +157,18 @@ namespace HBRAK.Frontier.Cli
                 "Killmails",
                 () => api.GetKillMailsAsync(100),
                 id => api.GetKillMailIdAsync(id),
-                k => $"{k?.Id}: {k?.Killer?.Name} -> {k?.Victim?.Name}");
+                k => $"{k?.Id}: {k?.Killer?.Name} --killed-> {k?.Victim?.Name}");
 
-            await RunListTest(
+            await RunListTestCharacters(
                 "Smart Characters",
                 () => api.GetSmartCharactersAsync(100),
-                id => api.GetSmartCharacterIdAsync(id),
-                c => $"{c?.Name} ({c?.Id})");
+                adress => api.GetSmartCharacterAdressAsync(adress),
+                c => $"{c?.Name ?? "(no name)"} ({c?.Id})");
 
             // --------- Game endpoints ---------
-            await RunListTest(
+            await RunListTestFuel(
                 "Fuels",
                 () => api.GetFuelsAsync(100),
-                // no single-by-id endpoint for fuels; keep a no-op for the second call
-                id => Task.FromResult<FuelType?>(null),
                 f => $"{f?.Type?.Name} efficiency={f?.Efficiency}");
 
             if (accessToken is not null)
@@ -82,7 +177,7 @@ namespace HBRAK.Frontier.Cli
                     "Smart Character Jumps",
                     () => api.GetSmartCharacterJumpsAsync(accessToken, 100),
                     id => api.GetSmartCharacterJumpIdAsync(id, accessToken),
-                    j => $"{j?.Ship?.TypeId} from {j?.Origin?.Name} → {j?.Destination?.Name} at {j?.Time}");
+                    j => $"{j?.Ship?.TypeId} from {j?.Origin?.Name} --jump-> {j?.Destination?.Name} at {j?.Time}");
             }
             else
             {
@@ -145,12 +240,48 @@ namespace HBRAK.Frontier.Cli
             if (list.Count > 0)
             {
                 var random = list[Rng.Next(list.Count)];
-                var idProp = typeof(TList).GetProperty("Id") ?? typeof(TList).GetProperty("id");
+                var idProp = typeof(TList).GetProperty("Id");
                 var id = idProp?.GetValue(random)?.ToString();
 
                 if (!string.IsNullOrEmpty(id))
                 {
                     var single = await singleFunc(id);
+                    if (single is not null)
+                    {
+                        Console.WriteLine($"Random single picked: {displayFunc(single)}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Could not determine ID property.");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        private static async Task RunListTestCharacters<TList, TSingle>(
+        string label,
+        Func<Task<List<TList>>> listFunc,
+        Func<string, Task<TSingle?>> singleFunc,
+        Func<TSingle?, string> displayFunc)
+        where TList : class
+        where TSingle : class
+        {
+            Console.WriteLine($"=== {label} ===");
+
+            var list = await WithLoadingDots(() => listFunc());
+            Console.WriteLine($"Got {list.Count} {label}");
+
+            if (list.Count > 0)
+            {
+                var random = list[Rng.Next(list.Count)];
+                var adressProp = typeof(TList).GetProperty("Address");
+                var adress = adressProp?.GetValue(random)?.ToString();
+
+                if (!string.IsNullOrEmpty(adress))
+                {
+                    var single = await singleFunc(adress);
                     if (single is not null)
                     {
                         Console.WriteLine($"Random single picked: {displayFunc(single)}");
@@ -234,6 +365,26 @@ namespace HBRAK.Frontier.Cli
             Console.WriteLine();
         }
 
+        private static async Task RunListTestFuel<TSingle>(
+        string label,
+        Func<Task<List<TSingle>>> listFunc,
+        Func<TSingle?, string> displayFunc)
+        where TSingle : class
+        {
+            Console.WriteLine($"=== {label} ===");
+
+            var list = await WithLoadingDots(() => listFunc());
+            Console.WriteLine($"Got {list.Count} {label}");
+
+            if (list.Count > 0)
+            {
+                TSingle random = list[Rng.Next(list.Count)];
+                Console.WriteLine($"Random single picked: {displayFunc(random)}");
+            }
+
+            Console.WriteLine();
+        }
+
         private static async Task<T> WithLoadingDots<T>(Func<Task<T>> action, string message = "Loading, this may take a while")
         {
             using var cts = new CancellationTokenSource();
@@ -263,7 +414,6 @@ namespace HBRAK.Frontier.Cli
                 Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
             }
         }
-
 
     }
 }
