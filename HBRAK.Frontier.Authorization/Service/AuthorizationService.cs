@@ -102,7 +102,7 @@ public class AuthorizationService : IAuthorizationService
 
         var json = await resp.Content.ReadAsStringAsync(ct);
 
-        AccessToken result = AccessToken.FromRefreshResponse(json);
+        AccessToken result = AccessToken.FromRefreshResponse(json)!;
 
         await _store.SaveAsync(result, ct);
         return result;

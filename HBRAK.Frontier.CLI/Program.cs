@@ -5,6 +5,7 @@ using HBRAK.Frontier.Api.Data.Info;
 using HBRAK.Frontier.Api.Service;
 using HBRAK.Frontier.Authorization.Data;
 using HBRAK.Frontier.Authorization.Service;
+using HBRAK.Frontier.Chain.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,12 +27,18 @@ internal static class Program
         var builder = Host.CreateApplicationBuilder(args);
         builder.Configuration
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
         builder.Services.Configure<ApiServiceOptions>(
             builder.Configuration.GetSection("Api"));
         builder.Services.Configure<AuthorizationServiceOptions>(
             builder.Configuration.GetSection("Authorization"));
+        builder.Services.Configure<ChainServiceOptions>(
+            builder.Configuration.GetSection("Chain"));
+
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
+
+        builder.Services.AddSingleton<IChainService, ChainService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
         builder.Services.AddSingleton<ITokenStore, WindowsDpapiTokenStore>();
         builder.Services.AddSingleton<IApiService, ApiService>();
@@ -40,6 +47,7 @@ internal static class Program
 
         var api = host.Services.GetRequiredService<IApiService>();
         var auth = host.Services.GetRequiredService<IAuthorizationService>();
+        var chain = host.Services.GetRequiredService<IChainService>();
 
         await TestAuth(auth);
         await TestApi(auth.Tokens.FirstOrDefault(), api);

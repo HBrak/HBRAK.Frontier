@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HBRAK.Frontier.Api\HBRAK.Frontier.Api.csproj" />
     <ProjectReference Include="..\HBRAK.Frontier.Authorization\HBRAK.Frontier.Authorization.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Chain\HBRAK.Frontier.Chain.csproj" />
   </ItemGroup>
 
 </Project>
