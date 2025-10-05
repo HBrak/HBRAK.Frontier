@@ -12,11 +12,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace HBRAK.Frontier.UI.StorageSearcher.ViewModels;
+namespace HBRAK.Frontier.App.StorageSearcher.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private static IApiService _api;
+    private readonly IApiService _api;
 
     private List<SmartAssemblyStorageUnit> _storages = [];
     private List<TypeDetails> _allTypes = [];

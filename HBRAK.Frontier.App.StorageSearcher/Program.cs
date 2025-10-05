@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace HBRAK.Frontier.UI.StorageSearcher
+namespace HBRAK.Frontier.App.StorageSearcher
 {
     internal sealed class Program
     {
@@ -26,16 +26,12 @@ namespace HBRAK.Frontier.UI.StorageSearcher
             //options
             builder.Services.Configure<ApiServiceOptions>(
                 builder.Configuration.GetSection("Api"));
-            builder.Services.Configure<AuthorizationServiceOptions>(
-                builder.Configuration.GetSection("Authorization"));
 
             //loggers
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
 
             //services
-            builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
-            builder.Services.AddSingleton<ITokenStore, WindowsDpapiTokenStore>();
             builder.Services.AddSingleton<IApiService, ApiService>();
 
             //main window

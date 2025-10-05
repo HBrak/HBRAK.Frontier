@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ public class AuthorizationService : IAuthorizationService
     public async Task<AccessToken?> AddTokenFromWebsiteCookie(string token, CancellationToken ct = default)
     {
         _logger.LogInformation("Adding token from website cookie");
-        var result = AccessToken.FromWebsiteCookie(token);
+        var result = AccessToken.FromWebsiteCookie(token)!;
         Tokens.Add(result);
         await _store.SaveAsync(result, ct);
         return result;
@@ -36,8 +37,9 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<AccessToken?> AuthorizeAsync(string redirectUri, IEnumerable<string> scopes, CancellationToken ct = default)
     {
+        
         _logger.LogCritical("Authorization via browser is not implemented yet by CCP.");
-        return null; //this is not implemented yet on CCP side :(
+        return await Task.FromResult<AccessToken?>(null); //this is not implemented yet on CCP side :(
     }
 
     public Task<IReadOnlyList<AccessToken>> LoadAllAsync(CancellationToken ct = default)
@@ -99,6 +101,7 @@ public class AuthorizationService : IAuthorizationService
         }
 
         var json = await resp.Content.ReadAsStringAsync(ct);
+
         AccessToken result = AccessToken.FromRefreshResponse(json);
 
         await _store.SaveAsync(result, ct);

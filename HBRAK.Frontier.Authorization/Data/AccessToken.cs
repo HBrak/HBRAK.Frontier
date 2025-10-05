@@ -16,10 +16,10 @@ public class AccessToken
     [JsonPropertyName("exp")] public long? Exp { get; set; }
     [JsonPropertyName("iat")] public long? Iat { get; set; }
     [JsonPropertyName("iss")] public string? Iss { get; set; }
-    [JsonPropertyName("sub")] public string? Sub { get; set; }
+    [JsonPropertyName("sub")] public required string Sub { get; set; }
     [JsonPropertyName("jti")] public string? Jti { get; set; }
     [JsonPropertyName("authenticationType")] public string? AuthenticationType { get; set; }
-    [JsonPropertyName("applicationId")] public string? ApplicationId { get; set; }
+    [JsonPropertyName("applicationId")] public required string ApplicationId { get; set; }
     [JsonPropertyName("scope")] public string? Scope { get; set; }
     [JsonPropertyName("roles")] public string[]? Roles { get; set; }
     [JsonPropertyName("sid")] public string? Sid { get; set; }
@@ -49,8 +49,7 @@ public class AccessToken
         if (string.IsNullOrWhiteSpace(token)) return null;
 
         var payloadJson = GetPayloadJson(token);
-        var claims = JsonSerializer.Deserialize<AccessToken>(payloadJson)
-                    ?? new AccessToken();
+        var claims = JsonSerializer.Deserialize<AccessToken>(payloadJson)!;
         claims.Token = token;
         return claims;
     }
@@ -70,7 +69,7 @@ public class AccessToken
             token.RefreshToken = JsonDocument.Parse(payloadJson)
                 .RootElement
                 .GetProperty("refreshToken")
-                .GetString();
+                .GetString()!;
         }
         return token;
     }
@@ -89,7 +88,7 @@ public class AccessToken
             token.RefreshToken = JsonDocument.Parse(response)
                 .RootElement
                 .GetProperty("refresh_token")
-                .GetString();
+                .GetString()!;
         }
         return token;
     }

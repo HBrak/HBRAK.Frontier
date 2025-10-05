@@ -3,13 +3,13 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using HBRAK.Frontier.UI.StorageSearcher.ViewModels;
-using HBRAK.Frontier.UI.StorageSearcher.Views;
+using HBRAK.Frontier.App.StorageSearcher.ViewModels;
+using HBRAK.Frontier.App.StorageSearcher.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
-namespace HBRAK.Frontier.UI.StorageSearcher
+namespace HBRAK.Frontier.App.StorageSearcher
 {
     public partial class App : Application
     {

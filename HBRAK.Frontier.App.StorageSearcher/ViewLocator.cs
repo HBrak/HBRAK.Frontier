@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using HBRAK.Frontier.UI.StorageSearcher.ViewModels;
+using HBRAK.Frontier.App.StorageSearcher.ViewModels;
 using System;
 
-namespace HBRAK.Frontier.UI.StorageSearcher
+namespace HBRAK.Frontier.App.StorageSearcher
 {
     public class ViewLocator : IDataTemplate
     {

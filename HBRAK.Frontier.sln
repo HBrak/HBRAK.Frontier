@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.CLI", "HBRAK
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Chain", "HBRAK.Frontier.Chain\HBRAK.Frontier.Chain.csproj", "{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.UI.StorageSearcher", "HBRAK.Frontier.UI.StorageSearcher\HBRAK.Frontier.UI.StorageSearcher.csproj", "{6AF0F253-E712-4692-838C-D23914C98A83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.App.StorageSearcher", "HBRAK.Frontier.App.StorageSearcher\HBRAK.Frontier.App.StorageSearcher.csproj", "{6AF0F253-E712-4692-838C-D23914C98A83}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

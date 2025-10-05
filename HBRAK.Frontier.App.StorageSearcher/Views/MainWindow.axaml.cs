@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace HBRAK.Frontier.UI.StorageSearcher.Views
+namespace HBRAK.Frontier.App.StorageSearcher.Views
 {
     public partial class MainWindow : Window
     {

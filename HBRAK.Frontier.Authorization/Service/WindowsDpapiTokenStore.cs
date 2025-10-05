@@ -1,12 +1,14 @@
 ﻿using HBRAK.Frontier.Authorization.Data;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace HBRAK.Frontier.Authorization.Service;
 
+[SupportedOSPlatform("windows")]
 public sealed class WindowsDpapiTokenStore : ITokenStore
 {
     private readonly string _root;
