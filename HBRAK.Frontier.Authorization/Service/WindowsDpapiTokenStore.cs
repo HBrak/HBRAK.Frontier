@@ -1,4 +1,6 @@
 ﻿using HBRAK.Frontier.Authorization.Data;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,9 +13,9 @@ public sealed class WindowsDpapiTokenStore : ITokenStore
     private readonly byte[] _entropy;
     private static readonly JsonSerializerOptions _json = CreateJsonOptions();
 
-    public WindowsDpapiTokenStore(string appFolderName = "HBRAK.Frontier/Auth")
+    public WindowsDpapiTokenStore(ILogger<WindowsDpapiTokenStore> logger, IOptions<AuthorizationServiceOptions> options)
     {
-        _root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appFolderName);
+        _root = Environment.ExpandEnvironmentVariables(options.Value.TokenStoragePath);
         Directory.CreateDirectory(_root);
         _entropy = System.Text.Encoding.UTF8.GetBytes("HBRAK.Frontier.Authorization.TokenEntropy:v1");
     }

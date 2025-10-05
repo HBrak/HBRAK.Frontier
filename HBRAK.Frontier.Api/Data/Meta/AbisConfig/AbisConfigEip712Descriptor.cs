@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiEip712Descriptor
+public class AbisConfigEip712Descriptor
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;

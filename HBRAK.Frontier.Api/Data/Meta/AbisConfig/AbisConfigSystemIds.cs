@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiSystemIds
+public class AbisConfigSystemIds
 {
     [JsonPropertyName("createCharacter")]
     public string CreateCharacter { get; set; } = string.Empty;

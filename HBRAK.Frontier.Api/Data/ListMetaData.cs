@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data;
 
-internal class ListMetaData
+public class ListMetaData
 {
     [JsonPropertyName("limit")]
     public int Data { get; set; }

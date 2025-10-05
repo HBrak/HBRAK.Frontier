@@ -1,4 +1,6 @@
 ﻿using HBRAK.Frontier.Authorization.Data;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,21 +13,21 @@ namespace HBRAK.Frontier.Authorization.Service;
 public class AuthorizationService : IAuthorizationService
 {
     private readonly ITokenStore _store;
-    private readonly HttpClient _http;
+    private readonly HttpClient _http = new HttpClient();
+    private readonly ILogger<AuthorizationService> _logger;
+    private readonly IOptions<AuthorizationServiceOptions> _options;
     public List<AccessToken> Tokens { get; } = [];
-    private string _appId;
 
-    public AuthorizationService(string appId, ITokenStore? store = null, HttpClient? http = null)
+    public AuthorizationService(ILogger<AuthorizationService> logger, IOptions<AuthorizationServiceOptions> options, ITokenStore tokenStore)
     {
-        _store = store ?? new WindowsDpapiTokenStore();
-        _http = http ?? new HttpClient();
-        _appId = appId;
-
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd("HBRAK.Frontier.Auth/1.0");
+        _store = tokenStore;
+        _logger = logger;
+        _options = options;
     }
 
-    public async Task<AccessToken> AddTokenFromWebsiteCookie(string token, CancellationToken ct = default)
+    public async Task<AccessToken?> AddTokenFromWebsiteCookie(string token, CancellationToken ct = default)
     {
+        _logger.LogInformation("Adding token from website cookie");
         var result = AccessToken.FromWebsiteCookie(token);
         Tokens.Add(result);
         await _store.SaveAsync(result, ct);
@@ -34,14 +36,16 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<AccessToken?> AuthorizeAsync(string redirectUri, IEnumerable<string> scopes, CancellationToken ct = default)
     {
+        _logger.LogCritical("Authorization via browser is not implemented yet by CCP.");
         return null; //this is not implemented yet on CCP side :(
     }
 
     public Task<IReadOnlyList<AccessToken>> LoadAllAsync(CancellationToken ct = default)
-        => _store.LoadAllAsync(_appId, ct);
+        => _store.LoadAllAsync(_options.Value.AppId, ct);
 
     public async Task LoadAndRefreshAllAsync(CancellationToken ct = default)
     {
+        _logger.LogInformation("Loading and refreshing all tokens");
         var savedTokens = await LoadAllAsync(ct);
 
         Tokens.Clear();
@@ -61,6 +65,7 @@ public class AuthorizationService : IAuthorizationService
         if (string.IsNullOrEmpty(token.RefreshToken))
             return token; // no offline access → nothing to refresh
 
+        _logger.LogInformation($"{token.EveSub} token expires at {token.ExpiresAt}, it is now {DateTimeOffset.UtcNow}");
         if (DateTimeOffset.UtcNow < token.ExpiresAt - TimeSpan.FromMinutes(1))
             return token; // still valid
 
@@ -71,6 +76,7 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<AccessToken> RefreshAsync(AccessToken token, CancellationToken ct)
     {
+        _logger.LogInformation($"Refreshing token for {token.EveSub} ");
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
         {
             ["grant_type"] = "refresh_token",
@@ -78,7 +84,7 @@ public class AuthorizationService : IAuthorizationService
             ["client_id"] = token.ApplicationId
         });
 
-        using var req = new HttpRequestMessage(HttpMethod.Post, "https://auth.evefrontier.com/oauth2/token")
+        using var req = new HttpRequestMessage(HttpMethod.Post, _options.Value.AuthUrl)
         {
             Content = content
         };
@@ -86,7 +92,8 @@ public class AuthorizationService : IAuthorizationService
 
         if (!resp.IsSuccessStatusCode)
         {
-            await _store.DeleteAsync(_appId, token.Sub!, ct);
+            _logger.LogError($"Failed to refresh token for {token.EveSub}, deleting token");
+            await _store.DeleteAsync(_options.Value.AppId, token.Sub!, ct);
             throw new UnauthorizedAccessException(
                 $"Refresh failed: {(int)resp.StatusCode} {resp.ReasonPhrase}");
         }

@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiCfg
+public class AbisConfigCfg
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -22,8 +22,8 @@ public class ConfigAbiCfg
     public string DeployedTo { get; set; } = string.Empty;
 
     [JsonPropertyName("abi")]
-    public List<ConfigAbiEntry> Abi { get; set; } = new();
+    public List<AbisConfigEntry> Abi { get; set; } = new();
 
     [JsonPropertyName("eip712")]
-    public ConfigAbiEip712Descriptor Eip712 { get; set; } = new();
+    public AbisConfigEip712Descriptor Eip712 { get; set; } = new();
 }

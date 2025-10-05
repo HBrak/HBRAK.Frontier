@@ -6,9 +6,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiEntry
+public class AbisConfigEntry
 {
     [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
@@ -17,10 +17,10 @@ public class ConfigAbiEntry
     public string? Name { get; set; }
 
     [JsonPropertyName("inputs")]
-    public List<ConfigAbiParameter>? Inputs { get; set; }
+    public List<AbisConfigParameter>? Inputs { get; set; }
 
     [JsonPropertyName("outputs")]
-    public List<ConfigAbiParameter>? Outputs { get; set; }
+    public List<AbisConfigParameter>? Outputs { get; set; }
 
     [JsonPropertyName("stateMutability")]
     public string? StateMutability { get; set; }

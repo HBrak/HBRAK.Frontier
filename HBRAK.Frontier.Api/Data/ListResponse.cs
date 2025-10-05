@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data;
 
-internal class ListResponse
+public class ListResponse
 {
     [JsonPropertyName("data")]
     public JsonElement Data { get; set; }

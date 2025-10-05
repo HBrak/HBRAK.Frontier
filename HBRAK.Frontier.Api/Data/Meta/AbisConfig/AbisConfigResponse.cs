@@ -5,12 +5,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiResponse
+public class AbisConfigResponse
 {
     [JsonPropertyName("system_ids")]
-    public ConfigAbiSystemIds SystemIds { get; set; } = new();
+    public AbisConfigSystemIds SystemIds { get; set; } = new();
 
     [JsonPropertyName("vault_dapp_url")]
     public string VaultDappUrl { get; set; } = string.Empty;
@@ -25,8 +25,8 @@ public class ConfigAbiResponse
     public int EveToLuxExchangeRate { get; set; }
 
     [JsonPropertyName("cfg")]
-    public List<ConfigAbiCfg> Cfg { get; set; } = new();
+    public List<AbisConfigCfg> Cfg { get; set; } = new();
 
     [JsonPropertyName("systems")]
-    public List<ConfigAbiSystem> Systems { get; set; } = new();
+    public List<AbisConfigSystem> Systems { get; set; } = new();
 }

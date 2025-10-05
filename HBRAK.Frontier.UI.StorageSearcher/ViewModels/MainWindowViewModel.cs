@@ -16,7 +16,7 @@ namespace HBRAK.Frontier.UI.StorageSearcher.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private static IApiService api = new ApiService();
+    private static IApiService _api;
 
     private List<SmartAssemblyStorageUnit> _storages = [];
     private List<TypeDetails> _allTypes = [];
@@ -24,17 +24,18 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private int _storageCount;
     [ObservableProperty] private string _targetType = string.Empty;
     [ObservableProperty] private bool _isLoading;
-    [ObservableProperty] private string _loadingText;
+    [ObservableProperty] private string _loadingText = string.Empty;
     [ObservableProperty] private ObservableCollection<string> _targetTypesStored = [];
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(IApiService api)
     {
+        _api = api;
         _ = LoadStorages();
         _ = LoadTypes();
     }
 
     [RelayCommand]
-    public async Task FindTargetTypes()
+    public void FindTargetTypes()
     {
         TargetTypesStored = [];
 
@@ -95,7 +96,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public async Task LoadTypes()
     {
-        _allTypes = await api.GetTypesAsync(limit: 1000);
+        _allTypes = await _api.GetTypesAsync(limit: 1000);
     }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
@@ -113,7 +114,7 @@ public partial class MainWindowViewModel : ViewModelBase
             LoadingText = "Fetching all storage refs";
 
             Console.WriteLine(LoadingText);
-            var storageRefs = await api.GetSmartAssembliesAsync(SmartAssemblyType.SmartStorageUnit);
+            var storageRefs = await _api.GetSmartAssembliesAsync(SmartAssemblyType.SmartStorageUnit);
 
             LoadingText = $"Loading Storages! Total: {storageRefs.Count}";
             Console.WriteLine(LoadingText);
@@ -124,7 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 LoadingText = $"Fetching storage by reference {loadingCount}/{storageRefs.Count}   ";
                 Console.Write(LoadingText);
-                var storage = await api.GetSmartAssemblyIdAsync(storageRef.Id) as SmartAssemblyStorageUnit;
+                var storage = await _api.GetSmartAssemblyIdAsync(storageRef.Id) as SmartAssemblyStorageUnit;
                 if (storage is not null)
                     loadingStorages.Add(storage);
                 loadingCount++;

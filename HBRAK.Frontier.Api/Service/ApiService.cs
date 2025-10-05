@@ -9,27 +9,31 @@ using HBRAK.Frontier.Api.Data.Game.SolarSystems;
 using HBRAK.Frontier.Api.Data.Game.Tribes;
 using HBRAK.Frontier.Api.Data.Game.Type;
 using HBRAK.Frontier.Api.Data.Meta.Config;
-using HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+using HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 using HBRAK.Frontier.Api.Data.Meta.Health;
 using HBRAK.Frontier.Authorization.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices.Marshalling;
+using Microsoft.Extensions.Options;
 
 namespace HBRAK.Frontier.Api.Service;
 
 public class ApiService : IApiService
 {
     private HttpClient _http;
+    private readonly ILogger<ApiService> _logger;
+    private readonly IOptions<ApiServiceOptions> _options;
 
-    public ApiService()
+    public ApiService(ILogger<ApiService> logger, IOptions<ApiServiceOptions> options)
     {
+        _logger = logger;
+        _options = options;
+
         _http = new HttpClient
         {
-            BaseAddress = new Uri("https://world-api-stillness.live.tech.evefrontier.com")
+            BaseAddress = new Uri(_options.Value.BaseUrl),
+            Timeout = TimeSpan.FromSeconds(_options.Value.TimeoutSeconds)
         };
     }
 
@@ -37,6 +41,7 @@ public class ApiService : IApiService
     {
         if (accessToken != null)
         {
+            _logger.LogInformation("Using access token for user {Sub}", accessToken.Sub);
             _http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken.Token);
         }
         else
@@ -45,19 +50,20 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<T?> GetFromApiAsync<T>(string apiPath, AccessToken? accessToken = null) where T : class
+    public async Task<T?> GetFromApiAsync<T>(string apiPath, AccessToken? accessToken = null) where T : class?
     {
         SetAuthorizationHeader(accessToken);
 
         var response = await _http.GetAsync(apiPath);
 
         if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"Error fetching {apiPath}: {response.StatusCode}");
+        { 
+            _logger.LogWarning($"Error fetching {apiPath}: {response.StatusCode}");
             return null;
         }
-
+        
         var json = await response.Content.ReadAsStringAsync();
+        _logger.LogDebug($"{apiPath} : {json}");
 
         if (typeof(T) == typeof(string))
         {
@@ -66,10 +72,23 @@ public class ApiService : IApiService
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    public async Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int limit = 10, Dictionary<string, string>? extraParams = null) where T : class
+    public async Task<List<T>> GetListFromApiAsync<T>(string apiPath, AccessToken? accessToken = null, int? limit = null, Dictionary<string, string>? extraParams = null) where T : class?
     {
         int offset = 0;
         List<T> listItems = [];
+
+        if (_options.Value.DefaultLimit <= 0 || _options.Value.DefaultLimit > _options.Value.MaxLimit)
+        {
+            _options.Value.DefaultLimit = Math.Min(_options.Value.DefaultLimit, _options.Value.MaxLimit);
+        }
+
+        if (limit == null)
+        {
+            limit = _options.Value.DefaultLimit;
+        }else if (limit.Value > _options.Value.MaxLimit)
+        {
+            limit = _options.Value.MaxLimit;
+        }
 
         string extraQuery = string.Empty;
         if (extraParams is not null && extraParams.Count > 0)
@@ -105,32 +124,32 @@ public class ApiService : IApiService
 
     }
 
-    public async Task<ConfigAbiResponse?> GetAbisConfigAsync()
+    public async Task<AbisConfigResponse?> GetAbisConfigAsync()
     {
-        return await GetFromApiAsync<ConfigAbiResponse?>("abis/config");
+        return await GetFromApiAsync<AbisConfigResponse?>(_options.Value.EndpointAbisConfig);
     }
 
     public async Task<List<ConfigResponse>?> GetConfigAsync()
     {
-        return await GetFromApiAsync<List<ConfigResponse>?>("config");
+        return await GetFromApiAsync<List<ConfigResponse>?>(_options.Value.EndpointConfig);
     }
 
     public async Task<HealthResponse?> GetHealthAsync()
     {
-        return await GetFromApiAsync<HealthResponse?>("health");
+        return await GetFromApiAsync<HealthResponse?>(_options.Value.EndpointHealth);
     }
 
-    public async Task<List<Killmail>> GetKillMailsAsync(int limit = 100)
+    public async Task<List<Killmail>> GetKillMailsAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<Killmail>("v2/killmails", null, limit);
+        return await GetListFromApiAsync<Killmail>(_options.Value.EndpointKillMails, null, limit);
     }
 
     public async Task<Killmail?> GetKillMailIdAsync(string id)
     {
-        return await GetFromApiAsync<Killmail?>($"v2/killmails/{id}");
+        return await GetFromApiAsync<Killmail?>($"{_options.Value.EndpointKillMails}/{id}");
     }
 
-    public async Task<List<SmartAssemblyReference>> GetSmartAssembliesAsync(SmartAssemblyType? type = null, int limit = 100)
+    public async Task<List<SmartAssemblyReference>> GetSmartAssembliesAsync(SmartAssemblyType? type = null, int? limit = null)
     {
         Dictionary<string, string>? param = null;
         if (type != null)
@@ -140,66 +159,66 @@ public class ApiService : IApiService
                 { "type", type.Value.ToString() }
             };
         }
-        return await GetListFromApiAsync<SmartAssemblyReference>("v2/smartassemblies", null, limit, param);
+        return await GetListFromApiAsync<SmartAssemblyReference>(_options.Value.EndpointSmartAssemblies, null, limit, param);
     }
 
     public async Task<SmartAssemblyBase?> GetSmartAssemblyIdAsync(string id)
     {
-        return await GetFromApiAsync<SmartAssemblyBase?>($"v2/smartassemblies/{id}");
+        return await GetFromApiAsync<SmartAssemblyBase?>($"{_options.Value.EndpointSmartAssemblies}/{id}");
     }
 
-    public async Task<List<SmartCharacterReference>> GetSmartCharactersAsync(int limit = 100)
+    public async Task<List<SmartCharacterReference>> GetSmartCharactersAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<SmartCharacterReference>("v2/smartcharacters", null, limit);
+        return await GetListFromApiAsync<SmartCharacterReference>(_options.Value.EndpointSmartCharacters, null, limit);
     }
 
     public async Task<SmartCharacter?> GetSmartCharacterAdressAsync(string adress)
     {
-        return await GetFromApiAsync<SmartCharacter?>($"v2/smartcharacters/{adress}");
+        return await GetFromApiAsync<SmartCharacter?>($"{_options.Value.EndpointSmartCharacters}/{adress}");
     }
 
-    public async Task<List<FuelType>> GetFuelsAsync(int limit = 100)
+    public async Task<List<FuelType>> GetFuelsAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<FuelType>("v2/fuels", null, limit);
+        return await GetListFromApiAsync<FuelType>(_options.Value.EndpointFuels, null, limit);
     }
 
-    public async Task<List<SmartCharacterJump>> GetSmartCharacterJumpsAsync(AccessToken accessToken, int limit = 100)
+    public async Task<List<SmartCharacterJump>> GetSmartCharacterJumpsAsync(AccessToken accessToken, int? limit = null)
     {
-        return await GetListFromApiAsync<SmartCharacterJump>("v2/smartcharacters/me/jumps", accessToken, limit);
+        return await GetListFromApiAsync<SmartCharacterJump>(_options.Value.EndpointSmartCharacterJumps, accessToken, limit);
     }
 
     public async Task<SmartCharacterJump?> GetSmartCharacterJumpIdAsync(string id, AccessToken accessToken)
     {
-        return await GetFromApiAsync<SmartCharacterJump?>($"v2/smartcharacters/me/jumps/{id}", accessToken);
+        return await GetFromApiAsync<SmartCharacterJump?>($"{_options.Value.EndpointSmartCharacterJumps}/{id}", accessToken);
     }
 
-    public async Task<List<SolarSystemReference>> GetSolarSystemsAsync(int limit = 100)
+    public async Task<List<SolarSystemReference>> GetSolarSystemsAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<SolarSystemReference>("v2/solarsystems", null, limit);
+        return await GetListFromApiAsync<SolarSystemReference>(_options.Value.EndpointSolarSystems, null, limit);
     }
 
     public async Task<SolarSystem?> GetSolarSystemIdAsync(string id)
     {
-        return await GetFromApiAsync<SolarSystem?>($"v2/solarsystems/{id}");
+        return await GetFromApiAsync<SolarSystem?>($"{_options.Value.EndpointSolarSystems}/{id}");
     }
 
-    public async Task<List<TribeReference>> GetTribesAsync(int limit = 100)
+    public async Task<List<TribeReference>> GetTribesAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<TribeReference>("v2/tribes", null, limit);
+        return await GetListFromApiAsync<TribeReference>(_options.Value.EndpointTribes, null, limit);
     }
 
     public async Task<Tribe?> GetTribeIdAsync(string id)
     {
-        return await GetFromApiAsync<Tribe?>($"v2/tribes/{id}");
+        return await GetFromApiAsync<Tribe?>($"{_options.Value.EndpointTribes}/{id}");
     }
 
-    public async Task<List<TypeDetails>> GetTypesAsync(int limit = 100)
+    public async Task<List<TypeDetails>> GetTypesAsync(int? limit = null)
     {
-        return await GetListFromApiAsync<TypeDetails>("v2/types", null, limit);
+        return await GetListFromApiAsync<TypeDetails>(_options.Value.EndpointTypes, null, limit);
     }
 
     public async Task<TypeDetails?> GetTypeIdAsync(string id)
     {
-        return await GetFromApiAsync<TypeDetails?>($"v2/types/{id}");
+        return await GetFromApiAsync<TypeDetails?>($"{_options.Value.EndpointTypes}/{id}");
     }
 }

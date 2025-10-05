@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiSystem
+public class AbisConfigSystem
 {
     [JsonPropertyName("namespaceLabel")]
     public string NamespaceLabel { get; set; } = string.Empty;

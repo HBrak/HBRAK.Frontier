@@ -6,9 +6,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HBRAK.Frontier.Api.Data.Meta.ConfigAbi;
+namespace HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 
-public class ConfigAbiParameter
+public class AbisConfigParameter
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -23,5 +23,5 @@ public class ConfigAbiParameter
     public bool? Indexed { get; set; }
 
     [JsonPropertyName("components")]
-    public List<ConfigAbiParameter>? Components { get; set; }
+    public List<AbisConfigParameter>? Components { get; set; }
 }

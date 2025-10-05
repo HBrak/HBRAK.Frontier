@@ -5,12 +5,21 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using HBRAK.Frontier.UI.StorageSearcher.ViewModels;
 using HBRAK.Frontier.UI.StorageSearcher.Views;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 
 namespace HBRAK.Frontier.UI.StorageSearcher
 {
     public partial class App : Application
     {
+        private readonly IServiceProvider _services;
+
+        public App(IServiceProvider services)
+        {
+            _services = services;
+        }
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -23,10 +32,9 @@ namespace HBRAK.Frontier.UI.StorageSearcher
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
+                var mainWindow = _services.GetRequiredService<Views.MainWindow>();
+                mainWindow.DataContext = _services.GetRequiredService<ViewModels.MainWindowViewModel>();
+                desktop.MainWindow = mainWindow;
             }
 
             base.OnFrameworkInitializationCompleted();
