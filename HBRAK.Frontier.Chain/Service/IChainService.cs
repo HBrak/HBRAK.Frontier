@@ -1,4 +1,5 @@
-﻿using Nethereum.RPC.Eth.DTOs;
+﻿using Nethereum.Hex.HexTypes;
+using Nethereum.RPC.Eth.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,16 @@ namespace HBRAK.Frontier.Chain.Service;
 
 public interface IChainService
 {
+    Task<T?> CallFunctionAsync<T>(
+        string contractAddress,
+        string abiJson,
+        string functionName,
+        string? fromAddress = null,
+        object[]? args = null,
+        string blockTag = "latest",
+        CancellationToken ct = default
+     );
+
     // Node / chain
     Task<string?> GetClientVersionAsync(CancellationToken ct = default);
     Task<long?> GetChainIdAsync(CancellationToken ct = default);

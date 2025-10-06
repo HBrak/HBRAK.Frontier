@@ -13,4 +13,8 @@
     <PackageReference Include="Nethereum.Web3" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HBRAK.Frontier.Api\HBRAK.Frontier.Api.csproj" />
+  </ItemGroup>
+
 </Project>

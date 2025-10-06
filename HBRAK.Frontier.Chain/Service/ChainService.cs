@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HBRAK.Frontier.Chain.Tools;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
@@ -22,6 +23,9 @@ public class ChainService : IChainService
     private readonly ChainServiceOptions _opts;
     private readonly Web3 _web3;
 
+
+
+
     public ChainService(ILogger<ChainService> logger, IOptions<ChainServiceOptions> options)
     {
         _logger = logger;
@@ -29,6 +33,37 @@ public class ChainService : IChainService
 
         var rpc = new RpcClient(new Uri(_opts.RpcUrl));
         _web3 = new Web3(rpc);
+    }
+
+    public async Task<T?> CallFunctionAsync<T>(
+        string contractAddress,
+        string abiJson,
+        string functionName,
+        string? fromAddress = null,
+        object[]? args = null,
+        string blockTag = "latest",
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var contract = _web3.Eth.GetContract(abiJson, contractAddress);
+            var function = contract.GetFunction(functionName);
+            var blockParam = ToBlockParameter(blockTag);
+            var callArgs = args ?? Array.Empty<object>();
+
+            return await function.CallAsync<T>(
+                from: fromAddress,
+                gas: null,
+                value: null,
+                block: blockParam,
+                functionInput: callArgs
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "CallFunctionAsync failed: {Function} on {Contract}", functionName, contractAddress);
+            return default;
+        }
     }
 
     // --- Node / chain ---
@@ -135,7 +170,6 @@ public class ChainService : IChainService
     }
 
     // --- helpers ---
-
     private static BlockParameter ToBlockParameter(string blockTag)
     {
         if (string.IsNullOrWhiteSpace(blockTag) || blockTag.Equals("latest", StringComparison.OrdinalIgnoreCase))
@@ -164,32 +198,18 @@ public class ChainService : IChainService
 
         string? Get(string n) => props.TryGetValue(n, out var v) ? v?.ToString() : null;
 
-        static HexBigInteger? ToHexBig(string? hexOrDec)
-        {
-            if (string.IsNullOrWhiteSpace(hexOrDec)) return null;
 
-            if (hexOrDec.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-                return new HexBigInteger(hexOrDec.HexToBigInteger(false));
-
-            if (ulong.TryParse(hexOrDec, out var u))
-                return new HexBigInteger(u);
-
-            if (BigInteger.TryParse(hexOrDec, out var b))
-                return new HexBigInteger(b);
-
-            return null;
-        }
 
         return new CallInput
         {
             From = Get("from"),
             To = Get("to"),
             Data = Get("data"),
-            Value = ToHexBig(Get("value")),
-            Gas = ToHexBig(Get("gas")),
-            GasPrice = ToHexBig(Get("gasPrice")),
-            MaxFeePerGas = ToHexBig(Get("maxFeePerGas")),
-            MaxPriorityFeePerGas = ToHexBig(Get("maxPriorityFeePerGas"))
+            Value = HexStringExtensions.ToHexBigInt(Get("value")),
+            Gas = HexStringExtensions.ToHexBigInt(Get("gas")),
+            GasPrice = HexStringExtensions.ToHexBigInt(Get("gasPrice")),
+            MaxFeePerGas = HexStringExtensions.ToHexBigInt(Get("maxFeePerGas")),
+            MaxPriorityFeePerGas = HexStringExtensions.ToHexBigInt(Get("maxPriorityFeePerGas"))
         };
     }
 }
