@@ -1,4 +1,5 @@
-﻿using HBRAK.Frontier.Api.Data.Chain.Enums;
+﻿using HBRAK.Frontier.Api.Data;
+using HBRAK.Frontier.Api.Data.Chain.Enums;
 using HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 using HBRAK.Frontier.Api.Data.Game.Fuels;
 using HBRAK.Frontier.Api.Data.Info;
@@ -6,6 +7,7 @@ using HBRAK.Frontier.Api.Service;
 using HBRAK.Frontier.Authorization.Data;
 using HBRAK.Frontier.Authorization.Service;
 using HBRAK.Frontier.Chain.Service;
+using HBRAK.Frontier.Chain.Tools;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,12 +44,35 @@ internal static class Program
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
         builder.Services.AddSingleton<ITokenStore, WindowsDpapiTokenStore>();
         builder.Services.AddSingleton<IApiService, ApiService>();
+        builder.Services.AddSingleton<IChainContracts, ChainContractsService>();
         var host = builder.Build();
 
 
         var api = host.Services.GetRequiredService<IApiService>();
         var auth = host.Services.GetRequiredService<IAuthorizationService>();
         var chain = host.Services.GetRequiredService<IChainService>();
+        var contracts = host.Services.GetRequiredService<IChainContracts>();
+
+        var chars = await api.GetSmartCharactersAsync();
+        var hoelbrak = chars.FirstOrDefault(c => c.Name == "Hoelbrak");
+
+        var gatesRef = await api.GetSmartAssembliesAsync(SmartAssemblyType.SmartGate);
+        List<SmartGateAssembly> gates = [];
+        foreach (var gateRef in gatesRef)
+        {
+            var gate = await api.GetSmartAssemblyIdAsync(gateRef.Id) as SmartGateAssembly;
+            if (gate is null) continue;
+            gates.Add(gate);
+        }
+
+        foreach (var gate in gates)
+        {
+            bool isOnline = await contracts.ContractViewAsync<bool>("IWorld", "areGatesOnline", [HexStringExtensions.ToBigInt(gate.Id), HexStringExtensions.ToBigInt(gate.Gate.DestinationId)] );
+            Console.WriteLine($"Gate {gate.Name} to {gate.Gate.DestinationId} is {(isOnline ? "ONLINE" : "OFFLINE")}");
+        }
+
+
+
 
         await TestAuth(auth);
         await TestApi(auth.Tokens.FirstOrDefault(), api);

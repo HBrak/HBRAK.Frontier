@@ -1,9 +1,13 @@
 ﻿using HBRAK.Frontier.Api.Data.Meta.AbisConfig;
 using HBRAK.Frontier.Api.Service;
 using Microsoft.Extensions.Logging;
+using Nethereum.ABI.FunctionEncoding;
+using Nethereum.ABI.Model;
+using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Signer;
+using Nethereum.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +54,26 @@ public class ChainContractsService : IChainContracts
             ?? throw new InvalidOperationException($"Function '{functionName}' not found in contract {contractName}.");
 
         var abiJson = AsJson(config.Abi);
-        return await _chain.CallFunctionAsync<T>(config.DeployedTo, abiJson, functionName, fromAdress, args, blockTag, ct);
+
+        try
+        {
+            return await _chain.CallFunctionAsync<T>(config.DeployedTo, abiJson, functionName, fromAdress, args, blockTag, ct);
+        }
+        catch (SmartContractCustomErrorRevertException scEx)
+        {
+            var (name, sel, sig) = Tools.ErrorDecoder.TryDecodeName(abiJson, scEx.ExceptionEncodedData);
+
+            if (!string.IsNullOrEmpty(name))
+                _logger.LogWarning("Reverted {Function} with custom error {ErrorName} ({Signature}) [0x{Selector}] args={@Args}",
+                    functionName, name, sig, sel, args);
+            else
+                _logger.LogWarning("Reverted {Function} with custom error selector 0x{Selector} (ABI has no matching error entry)",
+                    functionName, sel);
+
+            // choose: rethrow or swallow
+            throw;            // rethrow so the caller can react (recommended during dev)
+                              // return default; // or swallow if you want a soft-failure
+        }
     }
 
     public async Task<string?> GetSystemIdAsync(string operationKey, CancellationToken ct = default)

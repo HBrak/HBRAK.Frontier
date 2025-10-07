@@ -59,9 +59,13 @@ public class ChainService : IChainService
                 functionInput: callArgs
             );
         }
+        catch (Nethereum.Contracts.SmartContractCustomErrorRevertException ex)
+        {
+            throw; // let caller handle this
+        }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "CallFunctionAsync failed: {Function} on {Contract}", functionName, contractAddress);
+            _logger.LogWarning(ex, $"CallFunctionAsync failed: {functionName} on {contractAddress}", functionName, contractAddress);
             return default;
         }
     }
