@@ -50,7 +50,7 @@ internal class SmartAssemblyConverter : JsonConverter<SmartAssemblyBase>
         var targetType = kind switch
         {
             SmartAssemblyType.SmartStorageUnit => typeof(SmartAssemblyStorageUnit),
-            SmartAssemblyType.SmartGate => typeof(SmartGateAssembly),
+            SmartAssemblyType.SmartGate => typeof(SmartAssemblyGate),
             SmartAssemblyType.SmartTurret => typeof(SmartTurretAssembly),
             SmartAssemblyType.Manufacturing => typeof(SmartAssemblyManufacturing),
             SmartAssemblyType.Refinery => typeof(SmartAssemblyRefinery),

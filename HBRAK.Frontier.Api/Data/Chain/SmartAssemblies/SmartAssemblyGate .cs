@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
 
-public class SmartGateAssembly : SmartAssemblyBase
+public class SmartAssemblyGate : SmartAssemblyBase
 {
     [JsonPropertyName("gate")] public GateInfo Gate { get; set; } = new();
 }

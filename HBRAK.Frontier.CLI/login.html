@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>EVE Vault - Sign in</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+    <div class="wrap">
+        <header class="brand">
+            <div class="logo">
+                <!-- simple inline "V" glyph -->
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M2 4h5l5 12 5-12h5l-8 16h-4L2 4z"></path>
+                </svg>
+            </div>
+            <div class="title">
+                <div class="kicker">EVE FRONTIER</div>
+                <h1>Vault Sign-In</h1>
+            </div>
+        </header>
+
+        <section class="panel">
+            <p class="muted">
+                Connect your <strong>Vault</strong> wallet and sign a message to prove ownership.
+            </p>
+
+            <div class="status">
+                <div class="row"><span>Network</span><code id="net">-</code></div>
+                <div class="row"><span>Account</span><code id="acct">-</code></div>
+                <div class="row"><span>Nonce</span><code id="nonce">__NONCE__</code></div>
+            </div>
+
+            <div class="actions">
+                <button id="btn" class="btn primary">
+                    <span class="pulse"></span>
+                    Connect & Sign
+                </button>
+                <button id="retry" class="btn ghost" hidden>Try again</button>
+            </div>
+
+            <div class="console" id="log" aria-live="polite"></div>
+        </section>
+
+        <footer class="fineprint">
+            <p>Expected chain: <code id="expected">eip155:__CHAIN_ID__</code></p>
+            <p class="tiny">We'll never ask for your seed phrase or private key.</p>
+        </footer>
+    </div>
+
+    <script>
+  (function(){
+    const expectedChainId = __CHAIN_ID__;           // injected by server
+    const nonce = "__NONCE__";                      // injected by server
+    const btn = document.getElementById('btn');
+    const retry = document.getElementById('retry');
+    const logEl = document.getElementById('log');
+    const netEl = document.getElementById('net');
+    const acctEl = document.getElementById('acct');
+
+    const log = (m, cls='') => {
+      const line = document.createElement('div');
+      if (cls) line.className = cls;
+      line.textContent = m;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    const setBusy = (busy) => {
+      btn.disabled = busy;
+      btn.classList.toggle('loading', busy);
+    };
+
+    retry.onclick = () => {
+      retry.hidden = true;
+      logEl.textContent = '';
+    };
+
+    btn.onclick = async () => {
+      retry.hidden = true;
+      setBusy(true);
+      logEl.textContent = '';
+      try {
+        if (!window.ethereum) {
+          log('No wallet provider found. Please install/enable the EVE Vault extension.', 'warn');
+          setBusy(false);
+          retry.hidden = false;
+          return;
+        }
+
+        // 1) request accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const address = (accounts && accounts[0]) || null;
+        if (!address) { log('No address returned', 'error'); setBusy(false); retry.hidden = false; return; }
+        acctEl.textContent = address;
+
+        // 2) check chain
+        const rawChainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const chainId = parseInt(rawChainId, 16);
+        netEl.textContent = `eip155:${chainId}`;
+
+        if (chainId !== expectedChainId) {
+          log(`Wrong network. Expected eip155:${expectedChainId}, got eip155:${chainId}.`, 'warn');
+          setBusy(false);
+          retry.hidden = false;
+          return;
+        }
+
+        // 3) build message (fixed string; sent back for server-side verify)
+        const message =
+`HBRAK Frontier Login
+Address: ${address}
+ChainId: ${chainId}
+Nonce: ${nonce}
+IssuedAt: ${new Date().toISOString()}`;
+
+        // 4) sign (EIP-191 personal_sign: [data, address])
+        log('Requesting signature...');
+        const signature = await window.ethereum.request({
+          method: 'personal_sign',
+          params: [ message, address ]
+        });
+
+        // 5) callback to desktop
+        const res = await fetch('/callback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address, signature, chainId, nonce, message })
+        });
+
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(`Callback failed: ${res.status} ${t}`);
+        }
+
+        log('Signed successfully. You may close this window.', 'ok');
+      } catch (e) {
+        log((e && e.message) ? e.message : String(e), 'error');
+        retry.hidden = false;
+      } finally {
+        setBusy(false);
+      }
+    };
+  })();
+    </script>
+</body>
+</html>

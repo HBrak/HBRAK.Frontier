@@ -8,16 +8,23 @@ using HBRAK.Frontier.Authorization.Data;
 using HBRAK.Frontier.Authorization.Service;
 using HBRAK.Frontier.Chain.Service;
 using HBRAK.Frontier.Chain.Tools;
+using HBRAK.Frontier.CLI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nethereum.Signer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HBRAK.Frontier.Cli;
 
@@ -48,40 +55,165 @@ internal static class Program
         var host = builder.Build();
 
 
-        var api = host.Services.GetRequiredService<IApiService>();
+        
         var auth = host.Services.GetRequiredService<IAuthorizationService>();
         var chain = host.Services.GetRequiredService<IChainService>();
         var contracts = host.Services.GetRequiredService<IChainContracts>();
 
-        var chars = await api.GetSmartCharactersAsync();
-        var hoelbrak = chars.FirstOrDefault(c => c.Name == "Hoelbrak");
 
+        var api = host.Services.GetRequiredService<IApiService>();
+
+
+        var bridge = new VaultSignIn();
+        var signed = await bridge.RunAsync(expectedChainId: 695569, ct: new());
+        var address = signed?.Address ?? null;
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            Console.WriteLine("No address obtained from signing, exiting.");
+            return;
+        }
+
+        var character = await api.GetSmartCharacterAdressAsync(address);
+        Console.WriteLine($"Logged into vault as: {character.Name} - {character.Address}");
+
+        return;
+
+        var tribes = await api.GetTribesAsync();
+        var TribeRef = tribes.FirstOrDefault(c => c.Name == "Wandering Order of the Last Frontier");
+        var targetTribe = await api.GetTribeIdAsync(TribeRef.Id.ToString());
+
+        foreach (var member in targetTribe.Members)
+        {
+            await GetAssets(api, member.Address);
+        }
+
+        return;
+    }
+
+    public static async Task GetAssets(IApiService api, string characterId)
+    {
+        var characterData = await api.GetSmartCharacterAdressAsync(characterId);
+        if (characterData is null)
+        {
+            Console.WriteLine($"Character with id {characterId} not found");
+            return;
+        }
+
+        var smartAssemblies = characterData?.SmartAssemblies.OrderBy(assembly => assembly.SolarSystem.Id).ToList();
+
+        Console.WriteLine($"------ {characterData.Name} ------------------------------");
+        Console.WriteLine($"{characterData.Name} has {smartAssemblies?.Count ?? 0} smart assemblies");
+
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.SmartStorageUnit.ToString()).Count()} SmartStorageUnit");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.SmartGate.ToString()).Count()} SmartGate");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.SmartTurret.ToString()).Count()} SmarSmartTurrettGate");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.Manufacturing.ToString()).Count()} Manufacturing");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.Refinery.ToString()).Count()} Refinery");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.NetworkNode.ToString()).Count()} NetworkNode");
+        Console.WriteLine($"-- {smartAssemblies?.Where(a => a.Type == SmartAssemblyType.SmartHangar.ToString()).Count()} SmartHangar");
+
+        if (characterData.Name == "Paarth")
+        {
+            Console.WriteLine($"**** skipping details because Paarth just takes too long");
+            return;
+        }
+
+        foreach (var smartRef in smartAssemblies ?? [])
+        {
+            var smartThing = await api.GetSmartAssemblyIdAsync(smartRef.Id);
+
+            var TypeId = smartThing?.TypeId ?? 0;
+            var type = await api.GetTypeIdAsync(TypeId.ToString());
+
+            Console.WriteLine($"{smartThing.SolarSystem.Name}: State({smartThing.State}), {type.Name}, {type.CategoryName} '{smartThing.Name}' {smartThing.Id}");
+
+            switch (smartThing)
+            {
+                case SmartAssemblyGate thing:
+
+                    if (string.IsNullOrWhiteSpace(thing.Gate.DestinationId)){
+                        Console.WriteLine($"-- Not linked");
+                        break;
+                    }
+
+                    var toGate = await api.GetSmartAssemblyIdAsync(thing.Gate.DestinationId) as SmartAssemblyGate;
+                    Console.WriteLine($"-- Linked:({toGate.Gate.Linked}), To: {toGate.SolarSystem}");
+                    break;
+                case SmartAssemblyNetworkNode thing:
+                    Console.WriteLine($"-- Burning:({thing.NetworkNode.Burn.IsBurning}), EnergyReserve: {thing.NetworkNode.TotalReservedEnergy}");
+                    break;
+                case SmartAssemblyStorageUnit thing:
+                    foreach (var item in thing.Storage.MainInventory.Items)
+                    {
+                        Console.WriteLine($"-- Item: {item.Name}, Amount: {item.Quantity}");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public static async Task TestChain(IApiService api, IChainService chain, IChainContracts contracts)
+    {
+        Console.WriteLine("=== Testing Chain ===");
+
+        Console.WriteLine("Getting smart characters");
+        var chars = await api.GetSmartCharactersAsync();
+        var hoelbrakRef = chars.FirstOrDefault(c => c.Name == "Hoelbrak");
+        var hoelbrak = await api.GetSmartCharacterAdressAsync(hoelbrakRef?.Address ?? string.Empty);
+
+
+        Console.WriteLine("Getting all smart gate references");
         var gatesRef = await api.GetSmartAssembliesAsync(SmartAssemblyType.SmartGate);
-        List<SmartGateAssembly> gates = [];
+
+        Console.WriteLine("Getting full gate info per reference");
+        List<SmartAssemblyGate> gates = [];
         foreach (var gateRef in gatesRef)
         {
-            var gate = await api.GetSmartAssemblyIdAsync(gateRef.Id) as SmartGateAssembly;
+            var gate = await api.GetSmartAssemblyIdAsync(gateRef.Id) as SmartAssemblyGate;
             if (gate is null) continue;
             gates.Add(gate);
         }
 
-        foreach (var gate in gates)
+        var userId = HexStringExtensions.ToBigInt(hoelbrak.Id);
+        if (userId is null)
         {
-            bool isOnline = await contracts.ContractViewAsync<bool>("IWorld", "areGatesOnline", [HexStringExtensions.ToBigInt(gate.Id), HexStringExtensions.ToBigInt(gate.Gate.DestinationId)] );
-            Console.WriteLine($"Gate {gate.Name} to {gate.Gate.DestinationId} is {(isOnline ? "ONLINE" : "OFFLINE")}");
+            Console.WriteLine($"Error in config. {hoelbrak.Name} (userId is null)");
         }
 
 
+        foreach (var gate in gates)
+        {
+            if (userId is null) break;
 
+            var from = HexStringExtensions.ToBigInt(gate.Id);
+            SmartAssemblyGate toGate = gates.FirstOrDefault(g => g.Gate.DestinationId == gate.Id);
+            var to = HexStringExtensions.ToBigInt(toGate?.Id);
 
-        await TestAuth(auth);
-        await TestApi(auth.Tokens.FirstOrDefault(), api);
+            if (to is null)
+            {
+                Console.WriteLine($"Error: *Gate {gate.Id}, in: '{gate.SolarSystem.Name}' has no destination set*");
+                continue;
+            }
 
+            bool isOnline = await contracts.SystemViewAsync<bool>("SmartGateSystem", "areGatesOnline", [from, to]);
+            if (!isOnline)
+            {
+                Console.WriteLine($"Gate {gate.Id}, From:'{gate.SolarSystem.Name}', To:'{toGate.SolarSystem.Name}' is {(isOnline ? "ONLINE" : "OFFLINE")}");
+                continue;
+            }
 
+            bool canJump = await contracts.SystemViewAsync<bool>("SmartGateSystem", "canJump", [userId, from, to]);
+            Console.WriteLine($"Character: '{hoelbrak.Name}' {(canJump ? "CAN" : "CAN NOT")} jump from Gate '{gate.SolarSystem.Name}' to''{toGate.SolarSystem.Name}'");
+        }
     }
 
     public static async Task FindSpecificTypeNameInStorages(string name, IApiService api)
     {
+        Console.WriteLine("=== Api function chaining ===");
+
         List<SmartAssemblyStorageUnit> storages = [];
 
         Console.WriteLine($"Fetching specific types (Name = {name}) in storages");

@@ -17,5 +17,10 @@
     <ProjectReference Include="..\HBRAK.Frontier.Chain\HBRAK.Frontier.Chain.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<None Update="login.html" CopyToOutputDirectory="PreserveNewest" />
+		<None Update="login.css"  CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
 </Project>
  
