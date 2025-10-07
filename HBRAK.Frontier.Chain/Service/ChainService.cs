@@ -1,6 +1,7 @@
 ﻿using HBRAK.Frontier.Chain.Tools;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client;
@@ -59,7 +60,7 @@ public class ChainService : IChainService
                 functionInput: callArgs
             );
         }
-        catch (Nethereum.Contracts.SmartContractCustomErrorRevertException ex)
+        catch (SmartContractCustomErrorRevertException)
         {
             throw; // let caller handle this
         }
