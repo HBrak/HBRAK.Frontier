@@ -34,11 +34,11 @@ internal static class Program
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
 
-        builder.Services.AddSingleton<IChainService, ChainService>();
+        builder.Services.AddSingleton<IChainService, EvmChainService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
         builder.Services.AddSingleton<ITokenStore, WindowsDpapiTokenStore>();
         builder.Services.AddSingleton<IApiService, ApiService>();
-        builder.Services.AddSingleton<IChainContracts, ChainContractsService>();
+        builder.Services.AddSingleton<IChainContracts, EvmChainContractsService>();
         var host = builder.Build();
 
 

@@ -18,16 +18,16 @@ using System.Threading.Tasks;
 
 namespace HBRAK.Frontier.Communication.Chain.Service;
 
-public class ChainService : IChainService
+public class EvmChainService : IChainService
 {
-    private readonly ILogger<ChainService> _logger;
+    private readonly ILogger<EvmChainService> _logger;
     private readonly ChainServiceOptions _opts;
     private readonly Web3 _web3;
 
 
 
 
-    public ChainService(ILogger<ChainService> logger, IOptions<ChainServiceOptions> options)
+    public EvmChainService(ILogger<EvmChainService> logger, IOptions<ChainServiceOptions> options)
     {
         _logger = logger;
         _opts = options.Value;

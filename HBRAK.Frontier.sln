@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Communicatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Communication.Chain", "HBRAK.Frontier.Communication.Chain\HBRAK.Frontier.Communication.Chain.csproj", "{BE01BA7B-A357-1538-142E-7624B6D9CDF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Communication.Chain.Evm", "HBRAK.Frontier.Communication.Chain.Evm\HBRAK.Frontier.Communication.Chain.Evm.csproj", "{8680C61C-0D36-4725-A207-D9AC43A9DBBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8680C61C-0D36-4725-A207-D9AC43A9DBBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8680C61C-0D36-4725-A207-D9AC43A9DBBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8680C61C-0D36-4725-A207-D9AC43A9DBBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8680C61C-0D36-4725-A207-D9AC43A9DBBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{E8038A50-029A-778B-DBD3-3D5D8D9265BE} = {D4631EDB-F732-4801-84BD-4979D593F112}
 		{F35338E5-9A98-76E5-06EB-AA853666BC88} = {28CAF9F7-99FF-4213-B048-9F38785B6BED}
 		{BE01BA7B-A357-1538-142E-7624B6D9CDF1} = {28CAF9F7-99FF-4213-B048-9F38785B6BED}
+		{8680C61C-0D36-4725-A207-D9AC43A9DBBD} = {28CAF9F7-99FF-4213-B048-9F38785B6BED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E4BAA25-0503-4A75-A07B-E9E92226026C}

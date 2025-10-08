@@ -15,9 +15,9 @@ using System.Text.RegularExpressions;
 
 namespace HBRAK.Frontier.Communication.Chain.Service;
 
-public class ChainContractsService : IChainContracts
+public class EvmChainContractsService : IChainContracts
 {
-    public ChainContractsService(IApiService api, IChainService chain, ILogger<ChainContractsService> logger)
+    public EvmChainContractsService(IApiService api, IChainService chain, ILogger<EvmChainContractsService> logger)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _chain = chain ?? throw new ArgumentNullException(nameof(chain));
@@ -26,7 +26,7 @@ public class ChainContractsService : IChainContracts
 
     private IApiService _api;
     private IChainService _chain;
-    private ILogger<ChainContractsService> _logger;
+    private ILogger<EvmChainContractsService> _logger;
     private AbisConfigResponse? _cfg;
 
     private async Task EnsureLoadedAsync(CancellationToken ct)
