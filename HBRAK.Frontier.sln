@@ -3,15 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36401.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Api", "HBRAK.Frontier.Api\HBRAK.Frontier.Api.csproj", "{53DC7F89-B0F6-4A4B-8680-4ACBEA989F90}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Authorization", "HBRAK.Frontier.Authorization\HBRAK.Frontier.Authorization.csproj", "{BED8D845-4020-4EBE-9DD7-E58189D67DCA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.CLI", "HBRAK.Frontier.CLI\HBRAK.Frontier.CLI.csproj", "{1EE9DD90-EC17-42E6-A611-7B8A2C5F4271}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Chain", "HBRAK.Frontier.Chain\HBRAK.Frontier.Chain.csproj", "{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.App.StorageSearcher", "HBRAK.Frontier.App.StorageSearcher\HBRAK.Frontier.App.StorageSearcher.csproj", "{6AF0F253-E712-4692-838C-D23914C98A83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Authorization.Api", "HBRAK.Frontier.Authorization.Api\HBRAK.Frontier.Authorization.Api.csproj", "{989D2DF0-76F4-41E5-B79F-4FB3724EB181}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Authorization.Wallet", "HBRAK.Frontier.Authorization.Wallet\HBRAK.Frontier.Authorization.Wallet.csproj", "{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Authorization.TokenStore", "HBRAK.Frontier.Authorization.TokenStore\HBRAK.Frontier.Authorization.TokenStore.csproj", "{12C0DE6F-6818-4700-969D-8E39E0050195}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization", "Authorization", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Communication", "Communication", "{28CAF9F7-99FF-4213-B048-9F38785B6BED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{D4631EDB-F732-4801-84BD-4979D593F112}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.App.CLI", "HBRAK.Frontier.App.CLI\HBRAK.Frontier.App.CLI.csproj", "{E8038A50-029A-778B-DBD3-3D5D8D9265BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Communication.Api", "HBRAK.Frontier.Communication.Api\HBRAK.Frontier.Communication.Api.csproj", "{F35338E5-9A98-76E5-06EB-AA853666BC88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HBRAK.Frontier.Communication.Chain", "HBRAK.Frontier.Communication.Chain\HBRAK.Frontier.Communication.Chain.csproj", "{BE01BA7B-A357-1538-142E-7624B6D9CDF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,29 +29,46 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{53DC7F89-B0F6-4A4B-8680-4ACBEA989F90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53DC7F89-B0F6-4A4B-8680-4ACBEA989F90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53DC7F89-B0F6-4A4B-8680-4ACBEA989F90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53DC7F89-B0F6-4A4B-8680-4ACBEA989F90}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BED8D845-4020-4EBE-9DD7-E58189D67DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BED8D845-4020-4EBE-9DD7-E58189D67DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BED8D845-4020-4EBE-9DD7-E58189D67DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BED8D845-4020-4EBE-9DD7-E58189D67DCA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1EE9DD90-EC17-42E6-A611-7B8A2C5F4271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1EE9DD90-EC17-42E6-A611-7B8A2C5F4271}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1EE9DD90-EC17-42E6-A611-7B8A2C5F4271}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1EE9DD90-EC17-42E6-A611-7B8A2C5F4271}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83D19D6E-C3C3-4080-9BDF-E797BBAD120E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6AF0F253-E712-4692-838C-D23914C98A83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6AF0F253-E712-4692-838C-D23914C98A83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AF0F253-E712-4692-838C-D23914C98A83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AF0F253-E712-4692-838C-D23914C98A83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{989D2DF0-76F4-41E5-B79F-4FB3724EB181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{989D2DF0-76F4-41E5-B79F-4FB3724EB181}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{989D2DF0-76F4-41E5-B79F-4FB3724EB181}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{989D2DF0-76F4-41E5-B79F-4FB3724EB181}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12C0DE6F-6818-4700-969D-8E39E0050195}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12C0DE6F-6818-4700-969D-8E39E0050195}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12C0DE6F-6818-4700-969D-8E39E0050195}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12C0DE6F-6818-4700-969D-8E39E0050195}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8038A50-029A-778B-DBD3-3D5D8D9265BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8038A50-029A-778B-DBD3-3D5D8D9265BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8038A50-029A-778B-DBD3-3D5D8D9265BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8038A50-029A-778B-DBD3-3D5D8D9265BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F35338E5-9A98-76E5-06EB-AA853666BC88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F35338E5-9A98-76E5-06EB-AA853666BC88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F35338E5-9A98-76E5-06EB-AA853666BC88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F35338E5-9A98-76E5-06EB-AA853666BC88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE01BA7B-A357-1538-142E-7624B6D9CDF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6AF0F253-E712-4692-838C-D23914C98A83} = {D4631EDB-F732-4801-84BD-4979D593F112}
+		{989D2DF0-76F4-41E5-B79F-4FB3724EB181} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{6D922D1E-CC9B-4EA5-BB0A-0C5B16A80E02} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{12C0DE6F-6818-4700-969D-8E39E0050195} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E8038A50-029A-778B-DBD3-3D5D8D9265BE} = {D4631EDB-F732-4801-84BD-4979D593F112}
+		{F35338E5-9A98-76E5-06EB-AA853666BC88} = {28CAF9F7-99FF-4213-B048-9F38785B6BED}
+		{BE01BA7B-A357-1538-142E-7624B6D9CDF1} = {28CAF9F7-99FF-4213-B048-9F38785B6BED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E4BAA25-0503-4A75-A07B-E9E92226026C}

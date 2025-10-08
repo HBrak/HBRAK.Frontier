@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HBRAK.Frontier.Authorization.Api\HBRAK.Frontier.Authorization.Api.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Authorization.TokenStore\HBRAK.Frontier.Authorization.TokenStore.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Authorization.Wallet\HBRAK.Frontier.Authorization.Wallet.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Communication.Api\HBRAK.Frontier.Communication.Api.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Communication.Chain\HBRAK.Frontier.Communication.Chain.csproj" />
+  </ItemGroup>
+</Project>
+ 

@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HBRAK.Frontier.Api.Data.Chain.Enums;
-using HBRAK.Frontier.Api.Data.Chain.SmartAssemblies;
-using HBRAK.Frontier.Api.Data.Game.Type;
-using HBRAK.Frontier.Api.Data.Info;
-using HBRAK.Frontier.Api.Service;
+using HBRAK.Frontier.Communication.Api.Data.Chain.Enums;
+using HBRAK.Frontier.Communication.Api.Data.Chain.SmartAssemblies;
+using HBRAK.Frontier.Communication.Api.Data.Game.Type;
+using HBRAK.Frontier.Communication.Api.Data.Info;
+using HBRAK.Frontier.Communication.Api.Service;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

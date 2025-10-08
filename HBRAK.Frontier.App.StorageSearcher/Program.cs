@@ -1,6 +1,6 @@
 ﻿using Avalonia;
-using HBRAK.Frontier.Api.Service;
 using HBRAK.Frontier.Authorization.Service;
+using HBRAK.Frontier.Communication.Api.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
