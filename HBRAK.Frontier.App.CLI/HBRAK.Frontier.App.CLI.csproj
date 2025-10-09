@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
   </ItemGroup>
 
@@ -16,7 +18,8 @@
     <ProjectReference Include="..\HBRAK.Frontier.Authorization.TokenStore\HBRAK.Frontier.Authorization.TokenStore.csproj" />
     <ProjectReference Include="..\HBRAK.Frontier.Authorization.Wallet\HBRAK.Frontier.Authorization.Wallet.csproj" />
     <ProjectReference Include="..\HBRAK.Frontier.Communication.Api\HBRAK.Frontier.Communication.Api.csproj" />
-    <ProjectReference Include="..\HBRAK.Frontier.Communication.Chain\HBRAK.Frontier.Communication.Chain.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Communication.Chain.Evm\HBRAK.Frontier.Communication.Chain.Evm.csproj" />
+    <ProjectReference Include="..\HBRAK.Frontier.Database.Indexer.Raw.Evm\HBRAK.Frontier.Database.Indexer.Raw.Evm.csproj" />
   </ItemGroup>
 </Project>
  

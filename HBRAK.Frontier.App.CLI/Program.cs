@@ -8,10 +8,17 @@ using HBRAK.Frontier.Communication.Api.Data.Info;
 using HBRAK.Frontier.Communication.Api.Service;
 using HBRAK.Frontier.Communication.Chain.Service;
 using HBRAK.Frontier.Communication.Chain.Tools;
+using HBRAK.Frontier.Database.Indexer.Raw;
+using HBRAK.Frontier.Database.Indexer.Raw.Context;
+using HBRAK.Frontier.Database.Indexer.Raw.Evm;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace HBRAK.Frontier.Cli;
 
@@ -34,22 +41,59 @@ internal static class Program
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
 
+        builder.Services.AddDbContextPool<FrontierRawDb>(o =>
+                o.UseSqlite($"Data Source={DefaultSqlitePath()}"));
+
         builder.Services.AddSingleton<IChainService, EvmChainService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
         builder.Services.AddSingleton<ITokenStore, WindowsDpapiTokenStore>();
         builder.Services.AddSingleton<IApiService, ApiService>();
         builder.Services.AddSingleton<IChainContracts, EvmChainContractsService>();
+
+        builder.Services.AddSingleton<IRawIndexer, EvmRawIndexer>();
+        builder.Services.AddHostedService<RawIngestHostedService>();
+
+
+
         var host = builder.Build();
 
+        await using (var scope = host.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<FrontierRawDb>();
 
-        
+            // 1) Ensure directory exists (SQLite won’t create nested folders)
+            var cs = db.Database.GetDbConnection().ConnectionString;
+            var dataSource = new SqliteConnectionStringBuilder(cs).DataSource;
+            var dir = Path.GetDirectoryName(Path.GetFullPath(dataSource));
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir!);
+
+            // 2) Create database file + tables from CURRENT MODEL (no migrations)
+            //    Use the relational creator for a stronger "create everything" behavior.
+            var creator = db.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
+
+            // Create database file if missing
+            if (!await creator.ExistsAsync())
+                await creator.CreateAsync();
+
+            // Create tables if missing (idempotent: will skip those that already exist)
+            await creator.CreateTablesAsync();
+
+            // 3) (Optional) sanity log
+            await LogTablesAsync(db);
+        }
+
+        await host.RunAsync();
+
+
+
         var auth = host.Services.GetRequiredService<IAuthorizationService>();
         var chain = host.Services.GetRequiredService<IChainService>();
         var contracts = host.Services.GetRequiredService<IChainContracts>();
-
-
         var api = host.Services.GetRequiredService<IApiService>();
 
+
+
+        return;
 
         var bridge = new VaultSignIn();
         var signed = await bridge.RunAsync(expectedChainId: 695569, ct: new());
@@ -78,6 +122,28 @@ internal static class Program
         }
 
         return;
+    }
+
+    static string DefaultSqlitePath()
+    {
+        var dataDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "HBRAK.Frontier", "Db");
+        Directory.CreateDirectory(dataDir);
+        return Path.Combine(dataDir, "frontier_raw.db");
+    }
+
+    static async Task LogTablesAsync(DbContext db)
+    {
+        Console.WriteLine("EF model tables:");
+        foreach (var et in db.Model.GetEntityTypes())
+            Console.WriteLine($" - {et.GetSchema() ?? "main"}.{et.GetTableName()}");
+
+        Console.WriteLine("SQLite actual tables:");
+        var rows = await db.Database
+            .SqlQueryRaw<string>("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
+            .ToListAsync();
+        foreach (var t in rows) Console.WriteLine($" * {t}");
     }
 
     public static async Task GetAssets(IApiService api, string characterId)
