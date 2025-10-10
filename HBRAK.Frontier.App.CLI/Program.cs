@@ -38,6 +38,8 @@ internal static class Program
         builder.Services.Configure<ChainServiceOptions>(
             builder.Configuration.GetSection("Chain"));
 
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
 
@@ -56,6 +58,7 @@ internal static class Program
 
 
         var host = builder.Build();
+
 
         await using (var scope = host.Services.CreateAsyncScope())
         {
