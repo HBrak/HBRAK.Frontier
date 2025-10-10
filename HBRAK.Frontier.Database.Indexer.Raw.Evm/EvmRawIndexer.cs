@@ -60,20 +60,29 @@ public sealed class EvmRawIndexer : IRawIndexer
         var blockNums = logs.Select(l => (long)l.BlockNumber.Value).Distinct().OrderBy(x => x).ToList();
         var txHashes = logs.Select(l => l.TransactionHash).Distinct().ToList();
 
-        // 4) upsert blocks (with timestamps) and transactions (minimal)
-        foreach (var bn in blockNums)
+        // 4) fetch all blocks in parallel, then upsert sequentially
+        var blockTasks = blockNums.Select(async bn =>
         {
-            var b = await _web3.Eth.Blocks.GetBlockWithTransactionsByNumber
-                                          .SendRequestAsync(new BlockParameter(new Nethereum.Hex.HexTypes.HexBigInteger(bn)));
+            var block = await _web3.Eth.Blocks.GetBlockWithTransactionsByNumber
+                .SendRequestAsync(new BlockParameter(new Nethereum.Hex.HexTypes.HexBigInteger(bn)));
 
-            if (b is null) continue;
+            return (bn, block);
+        });
 
-            await UpsertBlockAsync(bn, b);
-            foreach (var tx in b.Transactions ?? [])
+        var fetched = await Task.WhenAll(blockTasks);
+
+        // upsert (keep deterministic order)
+        foreach (var (bn, b) in fetched.Where(x => x.block is not null)
+                                       .OrderBy(x => x.bn))
+        {
+            await UpsertBlockAsync(bn, b!);
+
+            foreach (var tx in b!.Transactions ?? Array.Empty<Nethereum.RPC.Eth.DTOs.Transaction>())
             {
                 if (!txHashes.Contains(tx.TransactionHash)) continue; // only those that emitted our logs
                 await UpsertTxAsync(tx, bn);
             }
+
             await _db.SaveChangesAsync(ct);
         }
 

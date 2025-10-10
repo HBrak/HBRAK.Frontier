@@ -75,8 +75,11 @@ internal static class Program
             if (!await creator.ExistsAsync())
                 await creator.CreateAsync();
 
-            // Create tables if missing (idempotent: will skip those that already exist)
-            await creator.CreateTablesAsync();
+            // Create tables if missing
+            if (!await creator.HasTablesAsync())
+                await creator.CreateTablesAsync();
+            
+
 
             // 3) (Optional) sanity log
             await LogTablesAsync(db);
