@@ -10,7 +10,7 @@ using HBRAK.Frontier.Communication.Chain.Service;
 using HBRAK.Frontier.Communication.Chain.Tools;
 using HBRAK.Frontier.Database.Indexer.Raw;
 using HBRAK.Frontier.Database.Indexer.Raw.Context;
-using HBRAK.Frontier.Database.Indexer.Raw.Evm;
+using HBRAK.Frontier.Database.Indexer.Raw.Evm.Indexer;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -43,8 +43,13 @@ internal static class Program
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
 
+        
+
+        //yeah yeah
+        EvmRawIndexerOptions uglyopt = new();
+
         builder.Services.AddDbContextPool<FrontierRawDb>(o =>
-                o.UseSqlite($"Data Source={DefaultSqlitePath()}"));
+                o.UseSqlite($"Data Source={Environment.ExpandEnvironmentVariables(uglyopt.SqlitePath)}"));
 
         builder.Services.AddSingleton<IChainService, EvmChainService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();

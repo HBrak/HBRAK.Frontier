@@ -10,6 +10,4 @@ public sealed class RawCursor
 {
     public int Id { get; set; } = 1; // always 1
     public long LastProcessedBlock { get; set; } // watermark
-    public long? LastFinalizedBlock { get; set; } // optional
-    public long ChainId { get; set; }
 }
